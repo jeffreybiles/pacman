@@ -10,6 +10,8 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   y: 100,
   dx: 0,
   dy: 1,
+  boardWidth: 800,
+  boardHeight: 600,
 
 
   didInsertElement: function(){
@@ -32,12 +34,17 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     var ctx = this.get('ctx');
 
     ctx.fillStyle = '#aaa';
-    ctx.clearRect(0, 0, 800, 600)
+    ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight'))
     this.drawCircle()
-    this.set('x', this.get('x') + this.get('dx'));
-    this.set('y', this.get('y') + this.get('dy'));
+    this.calculatePacMovement()
     Ember.run.later(this, this.mainLoop, 1000/60)
   },
+
+  calculatePacMovement: function(){
+    this.set('x', this.get('x') + this.get('dx'));
+    this.set('y', this.get('y') + this.get('dy'));
+  },
+
 
   keyboardShortcuts: {
     up: function(){
