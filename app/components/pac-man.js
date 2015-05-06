@@ -13,10 +13,17 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   boardWidth: 800,
   boardHeight: 600,
   radius: 20,
+  diameter: Ember.computed('radius', function(){return this.get('radius')* 2;}),
+  wallHeight: Ember.computed.alias('diameter'),
+  wallWidth: Ember.computed.alias('diameter'),
 
+  walls: [
+    {x: 1, y: 1},
+    {x: 10, y: 5}
+  ],
 
   didInsertElement: function(){
-    this.mainLoop()
+    this.mainLoop();
   },
 
   drawCircle: function(){
@@ -30,12 +37,27 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     ctx.fill() 
   },
 
+  drawWalls: function(){
+    let canvas = document.getElementById("myCanvas");
+    let ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = '#000'
+    this.get('walls').forEach((wall)=>{
+      ctx.fillRect(wall.x * this.get('wallWidth'),
+                   wall.y * this.get('wallHeight'),
+                   this.get('wallWidth'),
+                   this.get('wallHeight'))
+
+    })
+  },
+
   mainLoop: function(){
     var ctx = this.get('ctx');
 
     ctx.fillStyle = '#aaa';
     ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight'))
     this.drawCircle()
+    this.drawWalls()
     this.calculatePacMovement()
     Ember.run.later(this, this.mainLoop, 1000/60)
   },
