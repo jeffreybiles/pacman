@@ -69,29 +69,23 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   },
 
   collisionDetection: function(){
-    if(this.get('x') - this.get('radius') <= 0){
-      this.collide('left');
-    } else if(this.get('x') + this.get('radius') >= this.get('boardWidth')){
-      this.collide('right');
-    } else if(this.get('y') - this.get('radius') <= 0){
-      this.collide('top');
-    } else if (this.get('y') + this.get('radius') >= this.get('boardHeight')){
-      this.collide('bottom');
+    if(this.collidedWithBorder()){
+      this.collide();
     }
   },
 
+  collidedWithBorder: function(){
+    return this.get('x') - this.get('radius') <= 0 ||
+           this.get('x') + this.get('radius') >= this.get('boardWidth') ||
+           this.get('y') - this.get('radius') <= 0 ||
+           this.get('y') + this.get('radius') >= this.get('boardHeight');
+  },
+
   collide: function(direction){
+    this.set('x', this.get('x') - this.get('dx'));
+    this.set('y', this.get('y') - this.get('dy'))
     this.set('dx', 0);
     this.set('dy', 0);
-    if(direction === 'left') {
-      this.set('x', this.get('x') + 1);
-    } else if(direction === 'right'){
-      this.set('x', this.get('x') - 1);
-    } else if(direction === 'top'){
-      this.set('y', this.get('y') + 1);
-    } else if(direction === 'bottom'){
-      this.set('y', this.get('y') - 1);
-    }
   },
 
   keyboardShortcuts: {
