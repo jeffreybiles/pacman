@@ -69,7 +69,7 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   },
 
   collisionDetection: function(){
-    if(this.collidedWithBorder()){
+    if(this.collidedWithBorder() || this.collidedWithWall()){
       this.collide();
     }
   },
@@ -79,6 +79,15 @@ export default Ember.Component.extend(KeyboardShortcuts, {
            this.get('x') + this.get('radius') >= this.get('boardWidth') ||
            this.get('y') - this.get('radius') <= 0 ||
            this.get('y') + this.get('radius') >= this.get('boardHeight');
+  },
+
+  collidedWithWall: function(){
+    return this.get('walls').any((wall)=>{
+      return this.get('x') - this.get('radius') <= (wall.x + 1) * this.get('wallWidth') &&
+             this.get('x') + this.get('radius') >= wall.x * this.get('wallWidth') &&
+             this.get('y') - this.get('radius') <= (wall.y + 1) * this.get('wallHeight') &&
+             this.get('y') + this.get('radius') >= wall.y * this.get('wallHeight');
+    });
   },
 
   collide: function(direction){
