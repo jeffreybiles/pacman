@@ -6,16 +6,17 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     let canvas = document.getElementById("myCanvas");
     return canvas.getContext("2d");
   }),
-  x: 100,
-  y: 100,
+  x: 200,
+  y: 200,
   dx: 0,
   dy: 1,
   boardWidth: 800,
   boardHeight: 600,
-  radius: 20,
-  diameter: Ember.computed('radius', function(){return this.get('radius')* 2;}),
-  wallHeight: Ember.computed.alias('diameter'),
-  wallWidth: Ember.computed.alias('diameter'),
+  squareSize: 40,
+  radius: Ember.computed('squareSize', function(){
+    return this.get('squareSize')/2;
+  }),
+  speed: 2,
 
   walls: [
     {x: 1, y: 1},
@@ -43,10 +44,10 @@ export default Ember.Component.extend(KeyboardShortcuts, {
 
     ctx.fillStyle = '#000'
     this.get('walls').forEach((wall)=>{
-      ctx.fillRect(wall.x * this.get('wallWidth'),
-                   wall.y * this.get('wallHeight'),
-                   this.get('wallWidth'),
-                   this.get('wallHeight'))
+      ctx.fillRect(wall.x * this.get('squareSize'),
+                   wall.y * this.get('squareSize'),
+                   this.get('squareSize'),
+                   this.get('squareSize'))
 
     })
   },
@@ -75,18 +76,18 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   },
 
   collidedWithBorder: function(){
-    return this.get('x') - this.get('radius') <= 0 ||
-           this.get('x') + this.get('radius') >= this.get('boardWidth') ||
-           this.get('y') - this.get('radius') <= 0 ||
-           this.get('y') + this.get('radius') >= this.get('boardHeight');
+    return this.get('x') - this.get('radius') < 0 ||
+           this.get('x') + this.get('radius') > this.get('boardWidth') ||
+           this.get('y') - this.get('radius') < 0 ||
+           this.get('y') + this.get('radius') > this.get('boardHeight');
   },
 
   collidedWithWall: function(){
     return this.get('walls').any((wall)=>{
-      return this.get('x') - this.get('radius') <= (wall.x + 1) * this.get('wallWidth') &&
-             this.get('x') + this.get('radius') >= wall.x * this.get('wallWidth') &&
-             this.get('y') - this.get('radius') <= (wall.y + 1) * this.get('wallHeight') &&
-             this.get('y') + this.get('radius') >= wall.y * this.get('wallHeight');
+      return this.get('x') - this.get('radius') < (wall.x + 1) * this.get('squareSize') &&
+             this.get('x') + this.get('radius') > wall.x * this.get('squareSize') &&
+             this.get('y') - this.get('radius') < (wall.y + 1) * this.get('squareSize') &&
+             this.get('y') + this.get('radius') > wall.y * this.get('squareSize');
     });
   },
 
@@ -100,18 +101,18 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   keyboardShortcuts: {
     up: function(){
       this.set('dx', 0);
-      this.set('dy', -1);
+      this.set('dy', this.get('speed') * -1);
     },
     down: function(){
       this.set('dx', 0);
-      this.set('dy', 1);
+      this.set('dy', this.get('speed'));
     },
     left: function(){
-      this.set('dx', -1);
+      this.set('dx', this.get('speed') * -1);
       this.set('dy', 0);
     },
     right: function(){
-      this.set('dx', 1);
+      this.set('dx', this.get('speed'));
       this.set('dy', 0);
     },
   }
