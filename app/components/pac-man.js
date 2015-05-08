@@ -21,14 +21,15 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   radius: Ember.computed('squareSize', function(){
     return this.get('squareSize')/2;
   }),
+  score: 0,
 
   grid: [
-    [0, 0, 0, 0, 0, 1, 1, 1],
-    [0, 1, 1, 1, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 1, 0, 1],
-    [0, 0, 1, 0, 0, 1, 0, 1],
-    [0, 0, 1, 0, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
+    [0, 2, 2, 2, 2, 1, 1, 1],
+    [2, 1, 1, 1, 2, 2, 2, 1],
+    [2, 2, 2, 2, 2, 1, 2, 1],
+    [2, 2, 1, 2, 2, 1, 2, 1],
+    [2, 2, 1, 2, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 2, 2, 1],
   ],
 
   didInsertElement: function(){
@@ -95,12 +96,20 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     this.drawGrid()
     if(this.get('frameCycle') === 20 || this.get('direction') === 'stopped'){
       this.movePac();
+      this.scoreUpdate();
       this.changePacDirection();
       this.set('frameCycle', 1);
     } else {
       this.set('frameCycle', this.get('frameCycle') + 1)
     }
     Ember.run.later(this, this.mainLoop, 1000/60)
+  },
+
+  scoreUpdate: function(){
+    if(this.cellTypeInDirection('stopped') === 2){
+      this.set('score', this.get('score') + 1);
+      this.get('grid')[this.get('y')][this.get('x')] = 0;
+    }
   },
 
   movePac: function(){
