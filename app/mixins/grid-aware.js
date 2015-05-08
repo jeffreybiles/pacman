@@ -53,11 +53,6 @@ export default Ember.Mixin.create({
     return this.get(coordinate) + this.coordinatesFor(direction)[coordinate]
   },
 
-  circleCenterFor: function(coordinate, direction){
-    let animationChange = this.coordinatesFor(direction)[coordinate] * this.get('frameCycle') / 20
-    return (this.get(coordinate) + 1/2 + animationChange) * this.get('squareSize')
-  },
-
   coordinatesFor: function(direction){
     return this.get(`directions.${direction}`)
   },
