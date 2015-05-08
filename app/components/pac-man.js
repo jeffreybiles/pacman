@@ -6,114 +6,133 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     let canvas = document.getElementById("myCanvas");
     return canvas.getContext("2d");
   }),
-  x: 200,
-  y: 200,
-  dx: 0,
-  dy: 1,
-  boardWidth: 800,
-  boardHeight: 600,
+  frameCycle: 0, 
+  x: 0,
+  y: 0,
+  direction: 'down',
+  intent: 'down',
+  boardWidth: Ember.computed(function(){
+    return this.get('grid')[0].length * this.get('squareSize')
+  }),
+  boardHeight: Ember.computed(function(){
+    return this.get('grid.length') * this.get('squareSize')
+  }),
   squareSize: 40,
   radius: Ember.computed('squareSize', function(){
     return this.get('squareSize')/2;
   }),
   speed: 2,
 
-  walls: [
-    {x: 1, y: 1},
-    {x: 10, y: 5}
+  grid: [
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
   ],
 
   didInsertElement: function(){
     this.mainLoop();
   },
 
-  drawCircle: function(){
-    let canvas = document.getElementById("myCanvas");
-    let ctx = canvas.getContext("2d");
+  drawPac: function(){
+    let ctx = this.get('ctx');
+    let directionCoordinates = this.coordinatesFor(this.get('direction'));
 
     ctx.fillStyle = '#000'
     ctx.beginPath()
-    ctx.arc(this.get('x'), this.get('y'), this.get('radius'), 0, Math.PI * 2, false);
+    ctx.arc(
+      (this.get('x') + 1/2 + (directionCoordinates.x * this.get('frameCycle') / 30)) * this.get('squareSize'), 
+      (this.get('y') + 1/2 + (directionCoordinates.y * this.get('frameCycle') / 30)) * this.get('squareSize'), 
+      this.get('radius'), 0, Math.PI * 2, false);
     ctx.closePath()
     ctx.fill() 
   },
 
-  drawWalls: function(){
-    let canvas = document.getElementById("myCanvas");
-    let ctx = canvas.getContext("2d");
+  drawGrid: function(){
+    let ctx = this.get('ctx');
+    let squareSize = this.get('squareSize');
+    ctx.fillStyle = '#000';
+    this.get('grid').forEach((row, i)=>{
+      row.forEach((block, j)=>{
+        if(block === 1){
+          ctx.fillRect(j * squareSize,
+                       i * squareSize,
+                       squareSize,
+                       squareSize)
+        } else if (block === 2){
+          ctx.beginPath()
+          ctx.arc((j + 1/2) * squareSize, 
+                  (i + 1/2) * squareSize, 
+                  squareSize / 6, 
+                  0, 
+                  Math.PI * 2, 
+                  false);
+          ctx.closePath()
+          ctx.fill()  
+        }
+      })
+    })    
+  },
 
-    ctx.fillStyle = '#000'
-    this.get('walls').forEach((wall)=>{
-      ctx.fillRect(wall.x * this.get('squareSize'),
-                   wall.y * this.get('squareSize'),
-                   this.get('squareSize'),
-                   this.get('squareSize'))
-
-    })
+  directions: {
+    'up': {x: 0, y: -1},
+    'down': {x: 0, y: 1},
+    'left': {x: -1, y: 0},
+    'right': {x: 1, y: 0},
+    'stopped': {x: 0, y: 0}
   },
 
   mainLoop: function(){
-    var ctx = this.get('ctx');
+    let ctx = this.get('ctx');
 
-    ctx.fillStyle = '#aaa';
-    ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight'))
-    this.drawCircle()
-    this.drawWalls()
-    this.calculatePacMovement()
+    ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight') * this.get('squareSize'))
+    this.drawPac()
+    this.drawGrid()
+    if(this.get('frameCycle') === 30){
+      let oldDirection = this.coordinatesFor(this.get('direction'))
+      let intent = this.get('intent')
+      this.set('x', this.get('x') + oldDirection.x)
+      this.set('y', this.get('y') + oldDirection.y)
+
+      let atIntent = this.gridInDirection(intent)
+
+      if(this.gridBlockedInDirection(intent)){
+        if(this.gridBlockedInDirection(this.get('direction'))){
+          this.set('direction', 'stopped')
+        }
+      } else {
+        this.set('direction', intent)
+      }
+      this.set('frameCycle', 0);
+    }
+    this.set('frameCycle', this.get('frameCycle') + 1)
     Ember.run.later(this, this.mainLoop, 1000/60)
   },
 
-  calculatePacMovement: function(){
-    this.collisionDetection();
-    this.set('x', this.get('x') + this.get('dx'));
-    this.set('y', this.get('y') + this.get('dy'));
+  gridBlockedInDirection: function(direction){
+    let gridInDirection = this.gridInDirection(direction);
+    return Ember.isEmpty(gridInDirection) || gridInDirection === 1;
   },
 
-  collisionDetection: function(){
-    if(this.collidedWithBorder() || this.collidedWithWall()){
-      this.collide();
+  gridInDirection: function(direction){
+    let nextX = this.get('x') + this.coordinatesFor(direction).x
+    let nextY = this.get('y') + this.coordinatesFor(direction).y
+
+    if(this.get('grid')[nextY]){
+      return this.get('grid')[nextY][nextX];
     }
   },
 
-  collidedWithBorder: function(){
-    return this.get('x') - this.get('radius') < 0 ||
-           this.get('x') + this.get('radius') > this.get('boardWidth') ||
-           this.get('y') - this.get('radius') < 0 ||
-           this.get('y') + this.get('radius') > this.get('boardHeight');
-  },
-
-  collidedWithWall: function(){
-    return this.get('walls').any((wall)=>{
-      return this.get('x') - this.get('radius') < (wall.x + 1) * this.get('squareSize') &&
-             this.get('x') + this.get('radius') > wall.x * this.get('squareSize') &&
-             this.get('y') - this.get('radius') < (wall.y + 1) * this.get('squareSize') &&
-             this.get('y') + this.get('radius') > wall.y * this.get('squareSize');
-    });
-  },
-
-  collide: function(direction){
-    this.set('x', this.get('x') - this.get('dx'));
-    this.set('y', this.get('y') - this.get('dy'))
-    this.set('dx', 0);
-    this.set('dy', 0);
+  coordinatesFor: function(direction){
+    return this.get(`directions.${direction}`)
   },
 
   keyboardShortcuts: {
-    up: function(){
-      this.set('dx', 0);
-      this.set('dy', this.get('speed') * -1);
-    },
-    down: function(){
-      this.set('dx', 0);
-      this.set('dy', this.get('speed'));
-    },
-    left: function(){
-      this.set('dx', this.get('speed') * -1);
-      this.set('dy', 0);
-    },
-    right: function(){
-      this.set('dx', this.get('speed'));
-      this.set('dy', 0);
-    },
+    up: function(){ this.set('intent', 'up')},
+    down: function(){ this.set('intent', 'down')},
+    left: function(){ this.set('intent', 'left')},
+    right: function(){ this.set('intent', 'right')},
   }
 });
