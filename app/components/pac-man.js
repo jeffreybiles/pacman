@@ -1,41 +1,20 @@
 import Ember from 'ember';
 import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 import Ghost from '../models/ghost';
+import GridAware from '../mixins/grid-aware';
 
-export default Ember.Component.extend(KeyboardShortcuts, {
-  ctx: Ember.computed(function(){
-    let canvas = document.getElementById("myCanvas");
-    return canvas.getContext("2d");
-  }),
-  frameCycle: 0, 
+export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   x: 0,
   y: 3,
   direction: 'down',
   intent: 'down',
-  boardWidth: Ember.computed(function(){
-    return this.get('grid')[0].length * this.get('squareSize')
-  }),
-  boardHeight: Ember.computed(function(){
-    return this.get('grid.length') * this.get('squareSize')
-  }),
-  squareSize: 40,
-  radius: Ember.computed('squareSize', function(){
-    return this.get('squareSize')/2;
-  }),
   score: 0,
   ghosts: [],
 
-  grid: [
-    [2, 2, 2, 2, 2, 1, 1, 1],
-    [2, 1, 1, 1, 2, 2, 2, 1],
-    [2, 2, 2, 2, 2, 1, 2, 1],
-    [2, 2, 1, 2, 2, 1, 2, 1],
-    [2, 2, 1, 2, 1, 1, 2, 1],
-    [1, 2, 2, 2, 2, 2, 2, 1],
-  ],
-
   didInsertElement: function(){
     this.get('ghosts').pushObject(Ghost.create())
+    this.get('ghosts').pushObject(Ghost.create({color: '#A3A'}))
+    this.get('ghosts').pushObject(Ghost.create({color: '#AA3'}))
     this.get('ghosts').forEach(function(ghost){
       ghost.loop();
     })
@@ -53,11 +32,6 @@ export default Ember.Component.extend(KeyboardShortcuts, {
       this.get('radius'), 0, Math.PI * 2, false);
     ctx.closePath()
     ctx.fill() 
-  },
-
-  circleCenterFor: function(coordinate, direction){
-    let animationChange = this.coordinatesFor(direction)[coordinate] * this.get('frameCycle') / 20
-    return (this.get(coordinate) + 1/2 + animationChange) * this.get('squareSize')
   },
 
   drawGrid: function(){
@@ -86,14 +60,6 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     })    
   },
 
-  directions: {
-    'up': {x: 0, y: -1},
-    'down': {x: 0, y: 1},
-    'left': {x: -1, y: 0},
-    'right': {x: 1, y: 0},
-    'stopped': {x: 0, y: 0}
-  },
-
   mainLoop: function(){
     let ctx = this.get('ctx');
 
@@ -101,7 +67,7 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     this.drawPac()
     this.drawGrid()
     this.get('ghosts').forEach(function(ghost){
-      ghost.drawOn(ctx);
+      ghost.draw();
     })
     if(this.get('frameCycle') === 20 || this.get('direction') === 'stopped'){
       this.movePac();
@@ -137,28 +103,6 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     } else {
       this.set('direction', intent)
     }
-  },
-
-  pathBlockedInDirection: function(direction){
-    let cellTypeInDirection = this.cellTypeInDirection(direction);
-    return Ember.isEmpty(cellTypeInDirection) || cellTypeInDirection === 1;
-  },
-
-  cellTypeInDirection: function(direction){
-    let nextX = this.nextCoordinate(direction, 'x')
-    let nextY = this.nextCoordinate(direction, 'y')
-
-    if(this.get('grid')[nextY]){
-      return this.get('grid')[nextY][nextX];
-    }
-  },
-
-  nextCoordinate: function(direction, coordinate){
-    return this.get(coordinate) + this.coordinatesFor(direction)[coordinate]
-  },
-
-  coordinatesFor: function(direction){
-    return this.get(`directions.${direction}`)
   },
 
   keyboardShortcuts: {

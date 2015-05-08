@@ -1,37 +1,16 @@
 import Ember from 'ember';
+import GridAware from '../mixins/grid-aware';
 
-// properties with a // afterwards are exact copies
-// of those same ones in pac-man component
-// put into a grid mixin (GridAware?)
-export default Ember.Object.extend({
+export default Ember.Object.extend(GridAware, {
   x: 0, //
   y: 0, //
-  frameCycle: 0, //
   direction: 'stopped',
-  squareSize: 40, //
-  radius: Ember.computed('squareSize', function(){
-    return this.get('squareSize')/2;
-  }), //
+  color: '#3AA',
 
-  grid: [
-    [2, 2, 2, 2, 2, 1, 1, 1],
-    [2, 1, 1, 1, 2, 2, 2, 1],
-    [2, 2, 2, 2, 2, 1, 2, 1],
-    [2, 2, 1, 2, 2, 1, 2, 1],
-    [2, 2, 1, 2, 1, 1, 2, 1],
-    [1, 2, 2, 2, 2, 2, 2, 1],
-  ],
+  draw: function(){
+    let ctx = this.get('ctx');
 
-  directions: {
-    'up': {x: 0, y: -1},
-    'down': {x: 0, y: 1},
-    'left': {x: -1, y: 0},
-    'right': {x: 1, y: 0},
-    'stopped': {x: 0, y: 0}
-  }, //
-
-  drawOn: function(ctx){
-    ctx.fillStyle = '#3AA'
+    ctx.fillStyle = this.get('color')
     ctx.beginPath()
     ctx.arc(
       this.circleCenterFor('x', this.get('direction')),
@@ -67,32 +46,5 @@ export default Ember.Object.extend({
     })
     let newDirection = possibleDirections[Math.floor(Math.random() * possibleDirections.length)]
     this.set('direction', newDirection)
-  },
-
-  pathBlockedInDirection: function(direction){
-    let cellTypeInDirection = this.cellTypeInDirection(direction);
-    return Ember.isEmpty(cellTypeInDirection) || cellTypeInDirection === 1;
-  }, //
-
-  cellTypeInDirection: function(direction){
-    let nextX = this.nextCoordinate(direction, 'x')
-    let nextY = this.nextCoordinate(direction, 'y')
-
-    if(this.get('grid')[nextY]){
-      return this.get('grid')[nextY][nextX];
-    }
-  }, //
-
-  nextCoordinate: function(direction, coordinate){
-    return this.get(coordinate) + this.coordinatesFor(direction)[coordinate]
-  }, //
-
-  circleCenterFor: function(coordinate, direction){
-    let animationChange = this.coordinatesFor(direction)[coordinate] * this.get('frameCycle') / 20
-    return (this.get(coordinate) + 1/2 + animationChange) * this.get('squareSize')
-  }, //
-
-  coordinatesFor: function(direction){
-    return this.get(`directions.${direction}`)
-  }, //
+  }, //this is structured differently, but shares same purpose as changePacDirection
 })
