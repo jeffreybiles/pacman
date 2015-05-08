@@ -96,9 +96,10 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     if(this.get('frameCycle') === 20 || this.get('direction') === 'stopped'){
       this.movePac();
       this.changePacDirection();
-      this.set('frameCycle', 0);
+      this.set('frameCycle', 1);
+    } else {
+      this.set('frameCycle', this.get('frameCycle') + 1)
     }
-    this.set('frameCycle', this.get('frameCycle') + 1)
     Ember.run.later(this, this.mainLoop, 1000/60)
   },
 
