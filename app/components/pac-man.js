@@ -21,14 +21,13 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   radius: Ember.computed('squareSize', function(){
     return this.get('squareSize')/2;
   }),
-  speed: 2,
 
   grid: [
-    [0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 1, 0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 1, 1, 1],
+    [0, 1, 1, 1, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 1, 0, 1],
+    [0, 0, 1, 0, 0, 1, 0, 1],
+    [0, 0, 1, 0, 1, 1, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 1],
   ],
 
@@ -43,8 +42,8 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     ctx.fillStyle = '#000'
     ctx.beginPath()
     ctx.arc(
-      (this.get('x') + 1/2 + (directionCoordinates.x * this.get('frameCycle') / 30)) * this.get('squareSize'), 
-      (this.get('y') + 1/2 + (directionCoordinates.y * this.get('frameCycle') / 30)) * this.get('squareSize'), 
+      (this.get('x') + 1/2 + (directionCoordinates.x * this.get('frameCycle') / 20)) * this.get('squareSize'),
+      (this.get('y') + 1/2 + (directionCoordinates.y * this.get('frameCycle') / 20)) * this.get('squareSize'),
       this.get('radius'), 0, Math.PI * 2, false);
     ctx.closePath()
     ctx.fill() 
@@ -90,14 +89,12 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight') * this.get('squareSize'))
     this.drawPac()
     this.drawGrid()
-    if(this.get('frameCycle') === 30){
-      let oldDirection = this.coordinatesFor(this.get('direction'))
+    if(this.get('frameCycle') === 20 || this.get('direction') === 'stopped'){
       let intent = this.get('intent')
-      this.set('x', this.get('x') + oldDirection.x)
-      this.set('y', this.get('y') + oldDirection.y)
-
-      let atIntent = this.gridInDirection(intent)
-
+      this.setProperties({
+        x: this.nextCoordinate(this.get('direction'), 'x'),
+        y: this.nextCoordinate(this.get('direction'), 'y')
+      })
       if(this.gridBlockedInDirection(intent)){
         if(this.gridBlockedInDirection(this.get('direction'))){
           this.set('direction', 'stopped')
@@ -117,12 +114,16 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   },
 
   gridInDirection: function(direction){
-    let nextX = this.get('x') + this.coordinatesFor(direction).x
-    let nextY = this.get('y') + this.coordinatesFor(direction).y
+    let nextX = this.nextCoordinate(direction, 'x')
+    let nextY = this.nextCoordinate(direction, 'y')
 
     if(this.get('grid')[nextY]){
       return this.get('grid')[nextY][nextX];
     }
+  },
+
+  nextCoordinate: function(direction, coordinate){
+    return this.get(coordinate) + this.coordinatesFor(direction)[coordinate]
   },
 
   coordinatesFor: function(direction){
