@@ -94,22 +94,30 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     this.drawPac()
     this.drawGrid()
     if(this.get('frameCycle') === 20 || this.get('direction') === 'stopped'){
-      let intent = this.get('intent')
-      this.setProperties({
-        x: this.nextCoordinate(this.get('direction'), 'x'),
-        y: this.nextCoordinate(this.get('direction'), 'y')
-      })
-      if(this.pathBlockedInDirection(intent)){
-        if(this.pathBlockedInDirection(this.get('direction'))){
-          this.set('direction', 'stopped')
-        }
-      } else {
-        this.set('direction', intent)
-      }
+      this.movePac();
+      this.changePacDirection();
       this.set('frameCycle', 0);
     }
     this.set('frameCycle', this.get('frameCycle') + 1)
     Ember.run.later(this, this.mainLoop, 1000/60)
+  },
+
+  movePac: function(){
+    this.setProperties({
+      x: this.nextCoordinate(this.get('direction'), 'x'),
+      y: this.nextCoordinate(this.get('direction'), 'y')
+    })
+  },
+
+  changePacDirection: function(){
+    let intent = this.get('intent')
+    if(this.pathBlockedInDirection(intent)){
+      if(this.pathBlockedInDirection(this.get('direction'))){
+        this.set('direction', 'stopped')
+      }
+    } else {
+      this.set('direction', intent)
+    }
   },
 
   pathBlockedInDirection: function(direction){
