@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
+import Ghost from '../models/ghost';
 
 export default Ember.Component.extend(KeyboardShortcuts, {
   ctx: Ember.computed(function(){
@@ -8,7 +9,7 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   }),
   frameCycle: 0, 
   x: 0,
-  y: 0,
+  y: 3,
   direction: 'down',
   intent: 'down',
   boardWidth: Ember.computed(function(){
@@ -22,9 +23,10 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     return this.get('squareSize')/2;
   }),
   score: 0,
+  ghosts: [],
 
   grid: [
-    [0, 2, 2, 2, 2, 1, 1, 1],
+    [2, 2, 2, 2, 2, 1, 1, 1],
     [2, 1, 1, 1, 2, 2, 2, 1],
     [2, 2, 2, 2, 2, 1, 2, 1],
     [2, 2, 1, 2, 2, 1, 2, 1],
@@ -33,6 +35,10 @@ export default Ember.Component.extend(KeyboardShortcuts, {
   ],
 
   didInsertElement: function(){
+    this.get('ghosts').pushObject(Ghost.create())
+    this.get('ghosts').forEach(function(ghost){
+      ghost.loop();
+    })
     this.mainLoop();
   },
 
@@ -94,6 +100,9 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight') * this.get('squareSize'))
     this.drawPac()
     this.drawGrid()
+    this.get('ghosts').forEach(function(ghost){
+      ghost.drawOn(ctx);
+    })
     if(this.get('frameCycle') === 20 || this.get('direction') === 'stopped'){
       this.movePac();
       this.scoreUpdate();
