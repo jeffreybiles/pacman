@@ -37,16 +37,20 @@ export default Ember.Component.extend(KeyboardShortcuts, {
 
   drawPac: function(){
     let ctx = this.get('ctx');
-    let directionCoordinates = this.coordinatesFor(this.get('direction'));
 
     ctx.fillStyle = '#000'
     ctx.beginPath()
     ctx.arc(
-      (this.get('x') + 1/2 + (directionCoordinates.x * this.get('frameCycle') / 20)) * this.get('squareSize'),
-      (this.get('y') + 1/2 + (directionCoordinates.y * this.get('frameCycle') / 20)) * this.get('squareSize'),
+      this.circleCenterFor('x', this.get('direction')),
+      this.circleCenterFor('y', this.get('direction')),
       this.get('radius'), 0, Math.PI * 2, false);
     ctx.closePath()
     ctx.fill() 
+  },
+
+  circleCenterFor: function(coordinate, direction){
+    let animationChange = this.coordinatesFor(direction)[coordinate] * this.get('frameCycle') / 20
+    return (this.get(coordinate) + 1/2 + animationChange) * this.get('squareSize')
   },
 
   drawGrid: function(){
@@ -95,8 +99,8 @@ export default Ember.Component.extend(KeyboardShortcuts, {
         x: this.nextCoordinate(this.get('direction'), 'x'),
         y: this.nextCoordinate(this.get('direction'), 'y')
       })
-      if(this.gridBlockedInDirection(intent)){
-        if(this.gridBlockedInDirection(this.get('direction'))){
+      if(this.pathBlockedInDirection(intent)){
+        if(this.pathBlockedInDirection(this.get('direction'))){
           this.set('direction', 'stopped')
         }
       } else {
@@ -108,12 +112,12 @@ export default Ember.Component.extend(KeyboardShortcuts, {
     Ember.run.later(this, this.mainLoop, 1000/60)
   },
 
-  gridBlockedInDirection: function(direction){
-    let gridInDirection = this.gridInDirection(direction);
-    return Ember.isEmpty(gridInDirection) || gridInDirection === 1;
+  pathBlockedInDirection: function(direction){
+    let cellTypeInDirection = this.cellTypeInDirection(direction);
+    return Ember.isEmpty(cellTypeInDirection) || cellTypeInDirection === 1;
   },
 
-  gridInDirection: function(direction){
+  cellTypeInDirection: function(direction){
     let nextX = this.nextCoordinate(direction, 'x')
     let nextY = this.nextCoordinate(direction, 'y')
 
