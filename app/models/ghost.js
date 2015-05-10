@@ -7,6 +7,7 @@ export default Ember.Object.extend(GridAware, Movement, {
   y: 0, //
   direction: 'stopped',
   color: '#3AA',
+  pac: null,
 
   draw: function(){
     let ctx = this.get('ctx');
@@ -21,13 +22,25 @@ export default Ember.Object.extend(GridAware, Movement, {
     ctx.fill()
   }, //shows many similarities to drawPac....
 
+  chanceOfPacmanIfInDirection: function(direction){
+    if(this.pathBlockedInDirection(direction)){
+      return 999999;
+    } else {
+      let coordinates = this.coordinatesFor(direction)
+      return ((this.get('y') - this.get('pac.y')) * coordinates.y) +
+             ((this.get('x') - this.get('pac.x')) * coordinates.x)
+    }
+  },
+
   changeDirection: function(){
-    // later this will take on the task of chasing pacman
-    // right now it's just moving randomly
-    let possibleDirections = ['left', 'right', 'up', 'down'].filter((direction)=>{
-      return !this.pathBlockedInDirection(direction)
+    let scoredDirections = ['left', 'right', 'up', 'down'].map((direction)=>{
+      return {
+        direction: direction,
+        score: this.chanceOfPacmanIfInDirection(direction)
+      }
     })
-    let newDirection = possibleDirections[Math.floor(Math.random() * possibleDirections.length)]
-    this.set('direction', newDirection)
-  }, //this is structured differently, but shares same purpose as changePacDirection
+    let sortedDirections = scoredDirections.sortBy('score')
+    let bestDirection = sortedDirections[0]
+    this.set('direction', bestDirection['direction'])
+  },
 })

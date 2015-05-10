@@ -11,10 +11,11 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   pac: null,
 
   didInsertElement: function(){
-    this.set('pac', Pac.create())
-    this.get('ghosts').pushObject(Ghost.create())
-    this.get('ghosts').pushObject(Ghost.create({color: '#A3A'}))
-    this.get('ghosts').pushObject(Ghost.create({color: '#AA3'}))
+    let pac = Pac.create()
+    this.set('pac', pac)
+    this.get('ghosts').pushObject(Ghost.create({pac: pac}))
+    this.get('ghosts').pushObject(Ghost.create({pac: pac, color: '#A3A'}))
+    this.get('ghosts').pushObject(Ghost.create({pac: pac, color: '#AA3'}))
     this.get('ghosts').forEach(function(ghost){
       ghost.loop();
     })
@@ -69,8 +70,8 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     let ctx = this.get('ctx');
 
     ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight') * this.get('squareSize'))
-    this.get('pac').draw()
     this.drawGrid()
+    this.get('pac').draw()
     this.get('ghosts').forEach(function(ghost){
       ghost.draw();
     })
