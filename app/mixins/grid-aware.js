@@ -44,9 +44,7 @@ export default Ember.Mixin.create({
     let nextX = this.nextCoordinate(direction, 'x')
     let nextY = this.nextCoordinate(direction, 'y')
 
-    if(this.get('grid')[nextY]){
-      return this.get('grid')[nextY][nextX];
-    }
+    return this.get(`grid.${nextY}.${nextX}`);
   },
 
   nextCoordinate(direction, coordinate) {
