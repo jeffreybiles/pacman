@@ -10,7 +10,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
 
   pac: null,
 
-  didInsertElement: function(){
+  didInsertElement() {
     let pac = Pac.create()
     this.set('pac', pac)
     this.get('ghosts').pushObject(Ghost.create({pac: pac}))
@@ -23,10 +23,10 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     this.mainLoop();
   },
 
-  drawPac: function(){
+  drawPac() {
   },
 
-  drawGrid: function(){
+  drawGrid() {
     let ctx = this.get('ctx');
     let squareSize = this.get('squareSize');
     ctx.fillStyle = '#000';
@@ -52,21 +52,21 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     })    
   },
 
-  mainLoop: function(){
+  mainLoop() {
     this.draw();
     this.scoreUpdate();
 
     Ember.run.later(this, this.mainLoop, 1000/60)
   },
   
-  scoreUpdate: function(){
+  scoreUpdate() {
     if(this.get('pac').cellTypeInDirection('stopped') === 2){
       this.set('score', this.get('score') + 1);
       this.get('grid')[this.get('pac.y')][this.get('pac.x')] = 0;
     }
   },
 
-  draw: function(){
+  draw() {
     let ctx = this.get('ctx');
 
     ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight') * this.get('squareSize'))
@@ -78,9 +78,9 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   },
 
   keyboardShortcuts: {
-    up: function(){ this.set('pac.intent', 'up')},
-    down: function(){ this.set('pac.intent', 'down')},
-    left: function(){ this.set('pac.intent', 'left')},
-    right: function(){ this.set('pac.intent', 'right')},
+    up() { this.set('pac.intent', 'up')},
+    down() { this.set('pac.intent', 'down')},
+    left() { this.set('pac.intent', 'left')},
+    right() { this.set('pac.intent', 'right')},
   }
 });

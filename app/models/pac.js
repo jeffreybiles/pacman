@@ -9,7 +9,7 @@ export default Ember.Object.extend(GridAware, Movement, {
   intent: 'down',
   framesPerMovement: 20,
 
-  draw: function(){
+  draw() {
     let ctx = this.get('ctx');
 
     ctx.fillStyle = '#000'
@@ -23,7 +23,7 @@ export default Ember.Object.extend(GridAware, Movement, {
   },
 
 
-  changeDirection: function(){
+  changeDirection() {
     let intent = this.get('intent')
     if(this.pathBlockedInDirection(intent)){
       if(this.pathBlockedInDirection(this.get('direction'))){

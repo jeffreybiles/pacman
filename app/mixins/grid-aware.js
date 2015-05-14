@@ -35,12 +35,12 @@ export default Ember.Mixin.create({
     'stopped': {x: 0, y: 0}
   },
 
-  pathBlockedInDirection: function(direction){
+  pathBlockedInDirection(direction) {
     let cellTypeInDirection = this.cellTypeInDirection(direction);
     return Ember.isEmpty(cellTypeInDirection) || cellTypeInDirection === 1;
   },
 
-  cellTypeInDirection: function(direction){
+  cellTypeInDirection(direction) {
     let nextX = this.nextCoordinate(direction, 'x')
     let nextY = this.nextCoordinate(direction, 'y')
 
@@ -49,11 +49,11 @@ export default Ember.Mixin.create({
     }
   },
 
-  nextCoordinate: function(direction, coordinate){
+  nextCoordinate(direction, coordinate) {
     return this.get(coordinate) + this.coordinatesFor(direction)[coordinate]
   },
 
-  coordinatesFor: function(direction){
+  coordinatesFor(direction) {
     return this.get(`directions.${direction}`)
   },
 });

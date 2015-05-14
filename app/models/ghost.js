@@ -9,7 +9,7 @@ export default Ember.Object.extend(GridAware, Movement, {
   color: '#3AA',
   pac: null,
 
-  draw: function(){
+  draw() {
     let ctx = this.get('ctx');
 
     ctx.fillStyle = this.get('color')
@@ -22,7 +22,7 @@ export default Ember.Object.extend(GridAware, Movement, {
     ctx.fill()
   }, //shows many similarities to drawPac....
 
-  chanceOfPacmanIfInDirection: function(direction){
+  chanceOfPacmanIfInDirection(direction) {
     if(this.pathBlockedInDirection(direction)){
       return 999999;
     } else {
@@ -32,7 +32,7 @@ export default Ember.Object.extend(GridAware, Movement, {
     }
   },
 
-  changeDirection: function(){
+  changeDirection() {
     let scoredDirections = ['left', 'right', 'up', 'down'].map((direction)=>{
       return {
         direction: direction,

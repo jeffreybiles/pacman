@@ -4,7 +4,7 @@ import Ember from 'ember';
 export default Ember.Mixin.create({
   framesPerMovement: 30,
 
-  loop: function(){
+  loop() {
     if(this.get('frameCycle') === this.get("framesPerMovement") || this.get('direction') === 'stopped'){
       this.move();
       this.changeDirection();
@@ -15,14 +15,14 @@ export default Ember.Mixin.create({
     Ember.run.later(this, this.loop, 1000/60)
   },
 
-  move: function(){
+  move() {
     this.setProperties({
       x: this.nextCoordinate(this.get('direction'), 'x'),
       y: this.nextCoordinate(this.get('direction'), 'y')
     })
   },
 
-  centerFor: function(coordinate, direction){
+  centerFor(coordinate, direction){
     let animationChange = this.coordinatesFor(direction)[coordinate] * this.get('frameCycle') / this.get('framesPerMovement')
     return (this.get(coordinate) + 1/2 + animationChange) * this.get('squareSize')
   },
