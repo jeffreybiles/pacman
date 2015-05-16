@@ -61,7 +61,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   
   scoreUpdate() {
     if(this.get('pac').cellTypeInDirection('stopped') === 2){
-      this.set('score', this.get('score') + 1);
+      this.incrementProperty('score');
       this.get('grid')[this.get('pac.y')][this.get('pac.x')] = 0;
     }
   },

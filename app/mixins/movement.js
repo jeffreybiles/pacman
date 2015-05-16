@@ -10,7 +10,7 @@ export default Ember.Mixin.create({
       this.changeDirection();
       this.set('frameCycle', 1);
     } else {
-      this.set('frameCycle', this.get('frameCycle') + 1)
+      this.incrementProperty('frameCycle')
     }
     Ember.run.later(this, this.loop, 1000/60)
   },
