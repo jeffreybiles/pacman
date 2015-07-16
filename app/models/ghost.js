@@ -24,23 +24,40 @@ export default Ember.Object.extend(GridAware, Movement, {
 
   chanceOfPacmanIfInDirection(direction) {
     if(this.pathBlockedInDirection(direction)){
-      return 999999;
+      return 0;
     } else {
       let coordinates = this.coordinatesFor(direction)
-      return ((this.get('y') - this.get('pac.y')) * coordinates.y) +
-             ((this.get('x') - this.get('pac.x')) * coordinates.x)
+      let chances = ((this.get('pac.y') - this.get('y')) * coordinates.y) +
+             ((this.get('pac.x') - this.get('x')) * coordinates.x)
+      return Math.max(chances, 0) + 0.2
+    }
+  },
+
+  getRandomItem(list, weight) {
+    var total_weight = weight.reduce(function (prev, cur, i, arr) {
+        return prev + cur;
+    });
+
+    var random_num = Math.random() * total_weight;
+    var weight_sum = 0;
+
+    for (var i = 0; i < list.length; i++) {
+        weight_sum += weight[i];
+        weight_sum = +weight_sum.toFixed(2);
+
+        if (random_num < weight_sum) {
+            return list[i];
+        }
     }
   },
 
   changeDirection() {
-    let scoredDirections = ['left', 'right', 'up', 'down'].map((direction)=>{
-      return {
-        direction: direction,
-        score: this.chanceOfPacmanIfInDirection(direction)
-      }
+    let directions = ['left', 'right', 'up', 'down']
+    let directionWeights = directions.map((direction)=>{
+      return this.chanceOfPacmanIfInDirection(direction);
     })
-    let sortedDirections = scoredDirections.sortBy('score')
-    let bestDirection = sortedDirections[0]
-    this.set('direction', bestDirection['direction'])
+
+    let bestDirection = this.getRandomItem(directions, directionWeights);
+    this.set('direction', bestDirection)
   },
 })

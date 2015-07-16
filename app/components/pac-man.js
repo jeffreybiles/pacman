@@ -15,15 +15,11 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     this.set('pac', pac)
     this.get('ghosts').pushObject(Ghost.create({pac: pac}))
     this.get('ghosts').pushObject(Ghost.create({pac: pac, color: '#A3A'}))
-    this.get('ghosts').pushObject(Ghost.create({pac: pac, color: '#AA3'}))
     this.get('ghosts').forEach(function(ghost){
       ghost.loop();
     })
     this.get('pac').loop();
     this.mainLoop();
-  },
-
-  drawPac() {
   },
 
   drawGrid() {
@@ -39,17 +35,17 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
                        squareSize)
         } else if (block === 2){
           ctx.beginPath()
-          ctx.arc((j + 1/2) * squareSize, 
-                  (i + 1/2) * squareSize, 
-                  squareSize / 6, 
-                  0, 
-                  Math.PI * 2, 
+          ctx.arc((j + 1/2) * squareSize,
+                  (i + 1/2) * squareSize,
+                  squareSize / 6,
+                  0,
+                  Math.PI * 2,
                   false);
           ctx.closePath()
-          ctx.fill()  
+          ctx.fill()
         }
       })
-    })    
+    })
   },
 
   mainLoop() {
@@ -58,7 +54,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
 
     Ember.run.later(this, this.mainLoop, 1000/60)
   },
-  
+
   scoreUpdate() {
     if(this.get('pac').cellTypeInDirection('stopped') === 2){
       this.incrementProperty('score');
