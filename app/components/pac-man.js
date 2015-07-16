@@ -8,6 +8,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   score: 0,
   ghosts: [],
   lives: 3,
+  level: 1,
 
   pac: null,
 
@@ -62,6 +63,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
       this.restart();
     } else if(this.levelComplete()) {
       this.resetGrid();
+      this.incrementProperty('level')
       this.restart();
     } else {
       Ember.run.later(this, this.mainLoop, 1000/60)
@@ -71,6 +73,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   restart() {
     if(this.get('lives') <= 0){
       this.set('score', 0);
+      this.set('level', 1);
       this.resetGrid();
       this.set('lives', 3);
     }

@@ -4,8 +4,8 @@ import Movement from '../mixins/movement';
 
 export default Ember.Object.extend(GridAware, Movement, {
   x: 0,
-  y: 3,
-  direction: 'down',
+  y: 4,
+  direction: 'stopped',
   intent: 'down',
   framesPerMovement: 20,
 
