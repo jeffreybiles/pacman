@@ -9,7 +9,6 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   ghosts: [],
   lives: 3,
   level: 1,
-
   pac: null,
 
   didInsertElement() {
@@ -31,19 +30,31 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   drawGrid() {
     let ctx = this.get('ctx');
     let squareSize = this.get('squareSize');
-    ctx.fillStyle = '#000';
     this.get('grid').forEach((row, i)=>{
       row.forEach((block, j)=>{
         if(block === 1){
+          ctx.fillStyle = '#000';
           ctx.fillRect(j * squareSize,
                        i * squareSize,
                        squareSize,
                        squareSize)
         } else if (block === 2){
+          ctx.fillStyle = '#000';
           ctx.beginPath()
           ctx.arc((j + 1/2) * squareSize,
                   (i + 1/2) * squareSize,
                   squareSize / 6,
+                  0,
+                  Math.PI * 2,
+                  false);
+          ctx.closePath()
+          ctx.fill()
+        } else if (block === 3){
+          ctx.fillStyle = '#090';
+          ctx.beginPath()
+          ctx.arc((j + 1/2) * squareSize,
+                  (i + 1/2) * squareSize,
+                  squareSize / 4,
                   0,
                   Math.PI * 2,
                   false);
@@ -56,7 +67,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
 
   mainLoop() {
     this.draw();
-    this.scoreUpdate();
+    this.eatPellets();
 
     if(this.didCollide()){
       this.decrementProperty('lives')
@@ -81,11 +92,14 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     this.start();
   },
 
-  scoreUpdate() {
-    if(this.get('pac').cellTypeInDirection('stopped') === 2){
+  eatPellets() {
+    let nextCellType = this.get('pac').cellTypeInDirection('stopped')
+    if(nextCellType === 2){
       this.incrementProperty('score');
-      this.get('grid')[this.get('pac.y')][this.get('pac.x')] = 0;
+    } else if (nextCellType === 3){
+      this.set('pac.powerPelletTime', this.get('pac.maxPowerPelletTime'));
     }
+    this.get('grid')[this.get('pac.y')][this.get('pac.x')] = 0;
   },
 
   didCollide() {

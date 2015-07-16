@@ -3,10 +3,17 @@ import Ember from 'ember';
 
 export default Ember.Mixin.create({
   framesPerMovement: 30,
+  timers: [],
 
   loop() {
     if(this.get('frameCycle') === this.get("framesPerMovement") || this.get('direction') === 'stopped'){
       this.move();
+      this.get('timers').forEach((timerName)=>{
+        var timer = this.get(timerName);
+        if(timer > 0){
+          this.set(timerName, timer - 1)
+        }
+      })
       this.changeDirection();
       this.set('frameCycle', 1);
     } else {

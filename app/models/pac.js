@@ -8,11 +8,20 @@ export default Ember.Object.extend(GridAware, Movement, {
   direction: 'stopped',
   intent: 'down',
   framesPerMovement: 20,
+  timers: ['powerPelletTime'],
+
+  color: Ember.computed('powerPelletTime', function(){
+    return `#0${Math.round(this.get('powerPelletTime')/this.get('maxPowerPelletTime')*15).toString(16)}0`
+  }),
+  maxPowerPelletTime: 15,
+  powerPelletTime: 0,
+  powerMode: Ember.computed.gt('powerPelletTime', 0),
+
 
   draw() {
     let ctx = this.get('ctx');
 
-    ctx.fillStyle = '#000'
+    ctx.fillStyle = this.get('color')
     ctx.beginPath()
     ctx.arc(
       this.centerFor('x', this.get('direction')),
