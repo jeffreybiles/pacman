@@ -27,6 +27,19 @@ export default Ember.Mixin.create({
     [1, 2, 2, 2, 2, 2, 2, 1],
   ],
 
+  resetGrid(){
+    let grid = this.get('grid')
+    let height = grid.length
+    let width = grid[0].length
+    for(var i=0; i < height; i++){
+      for(var j=0; j < width; j++){
+        if(grid[i][j] == 0){
+          grid[i][j] = 2
+        }
+      }
+    }
+  },
+
   directions: {
     'up': {x: 0, y: -1},
     'down': {x: 0, y: 1},

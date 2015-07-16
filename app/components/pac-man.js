@@ -7,10 +7,15 @@ import GridAware from '../mixins/grid-aware';
 export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   score: 0,
   ghosts: [],
+  lives: 3,
 
   pac: null,
 
   didInsertElement() {
+    this.start();
+  },
+
+  start() {
     let pac = Pac.create()
     this.set('pac', pac)
     this.get('ghosts').pushObject(Ghost.create({pac: pac}))
@@ -52,7 +57,23 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     this.draw();
     this.scoreUpdate();
 
-    Ember.run.later(this, this.mainLoop, 1000/60)
+    let didCollide = this.checkCollision();
+    if(didCollide){
+      this.restart()
+    } else {
+      Ember.run.later(this, this.mainLoop, 1000/60)
+    }
+  },
+
+  restart() {
+    this.decrementProperty('lives')
+    if(this.get('lives') <= 0){
+      this.set('score', 0);
+      this.resetGrid();
+      this.set('lives', 3);
+    }
+    this.set('ghosts', []);
+    this.start();
   },
 
   scoreUpdate() {
@@ -60,6 +81,18 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
       this.incrementProperty('score');
       this.get('grid')[this.get('pac.y')][this.get('pac.x')] = 0;
     }
+  },
+
+  checkCollision() {
+    let collided = false;
+    let pac = this.get('pac');
+    this.get('ghosts').forEach((ghost)=>{
+      if(pac.get('x') == ghost.get('x') &&
+         pac.get('y') == ghost.get('y')){
+        collided = true
+      }
+    });
+    return collided;
   },
 
   draw() {
