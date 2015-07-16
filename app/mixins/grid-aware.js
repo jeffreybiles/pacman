@@ -40,6 +40,19 @@ export default Ember.Mixin.create({
     }
   },
 
+  levelComplete() {
+    let hasPelletsLeft = false;
+    this.get('grid').forEach((row)=>{
+      let rowHasPellets = row.any((cell)=>{
+        return cell == 2
+      })
+      if(rowHasPellets){
+        hasPelletsLeft = true
+      }
+    })
+    return !hasPelletsLeft;
+  },
+
   directions: {
     'up': {x: 0, y: -1},
     'down': {x: 0, y: 1},

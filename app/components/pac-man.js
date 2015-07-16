@@ -57,16 +57,18 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     this.draw();
     this.scoreUpdate();
 
-    let didCollide = this.checkCollision();
-    if(didCollide){
-      this.restart()
+    if(this.didCollide()){
+      this.decrementProperty('lives')
+      this.restart();
+    } else if(this.levelComplete()) {
+      this.resetGrid();
+      this.restart();
     } else {
       Ember.run.later(this, this.mainLoop, 1000/60)
     }
   },
 
   restart() {
-    this.decrementProperty('lives')
     if(this.get('lives') <= 0){
       this.set('score', 0);
       this.resetGrid();
@@ -83,7 +85,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     }
   },
 
-  checkCollision() {
+  didCollide() {
     let collided = false;
     let pac = this.get('pac');
     this.get('ghosts').forEach((ghost)=>{
