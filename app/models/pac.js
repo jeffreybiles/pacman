@@ -3,8 +3,8 @@ import GridAware from '../mixins/grid-aware';
 import Movement from '../mixins/movement';
 
 export default Ember.Object.extend(GridAware, Movement, {
-  x: 0,
-  y: 4,
+  x: 1,
+  y: 5,
   direction: 'stopped',
   intent: 'down',
   framesPerMovement: 20,
