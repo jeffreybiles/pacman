@@ -18,6 +18,11 @@ export default Ember.Mixin.create({
     return this.get('grid.length') * this.get('squareSize')
   }),
 
+  //0- empty
+  //1- wall
+  //2- pellet
+  //3- power pellet
+  //4- jail (coming soon)
   grid: [
     [1, 1, 1, 1, 2, 1, 1, 1, 1],
     [1, 2, 2, 2, 2, 2, 1, 1, 1],
@@ -35,6 +40,7 @@ export default Ember.Mixin.create({
     let width = grid[0].length
     for(var i=0; i < height; i++){
       for(var j=0; j < width; j++){
+        //TODO: find a way to tell apart pellets and power pellets when repopulating grid
         if(grid[i][j] == 0){
           grid[i][j] = 2
         }
