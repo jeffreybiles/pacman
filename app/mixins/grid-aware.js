@@ -19,14 +19,14 @@ export default Ember.Mixin.create({
   }),
 
   grid: [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 2, 1, 1, 1, 1],
     [1, 2, 2, 2, 2, 2, 1, 1, 1],
     [1, 2, 1, 1, 1, 2, 2, 2, 1],
     [1, 2, 2, 2, 2, 2, 1, 2, 1],
     [1, 2, 2, 1, 2, 2, 1, 2, 1],
     [1, 2, 2, 1, 2, 1, 1, 2, 1],
     [1, 1, 2, 2, 2, 2, 2, 2, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 2, 1, 1, 1, 1],
   ],
 
   resetGrid(){
@@ -69,14 +69,20 @@ export default Ember.Mixin.create({
   },
 
   cellTypeInDirection(direction) {
-    let nextX = this.nextCoordinate(direction, 'x')
-    let nextY = this.nextCoordinate(direction, 'y')
+    let nextX = this.nextCoordinate(direction, 'x');
+    let nextY = this.nextCoordinate(direction, 'y');
 
     return this.get(`grid.${nextY}.${nextX}`);
   },
 
   nextCoordinate(direction, coordinate) {
-    return this.get(coordinate) + this.coordinatesFor(direction)[coordinate]
+    let size = coordinate == 'x' ? this.get('grid')[0].length : this.get('grid').length;
+    let calculatedNext = this.get(coordinate) + this.coordinatesFor(direction)[coordinate];
+    return this.modulo(calculatedNext, size);
+  },
+
+  modulo(num, mod){
+    return ((num + mod) % mod);
   },
 
   coordinatesFor(direction) {
