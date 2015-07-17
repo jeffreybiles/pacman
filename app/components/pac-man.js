@@ -2,9 +2,11 @@ import Ember from 'ember';
 import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 import Ghost from '../models/ghost';
 import Pac from '../models/pac';
-import GridAware from '../mixins/grid-aware';
+import GridInfo from '../mixins/grid-info';
 
-export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
+export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
+  grid: Ember.inject.service(),
+
   score: 0,
   ghosts: [],
   lives: 3,
@@ -12,14 +14,17 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   pac: null,
 
   didInsertElement() {
+    this.get('grid').reset()
     this.start();
   },
 
   start() {
-    let pac = Pac.create()
+    let grid = this.get('grid')
+    let pac = Pac.create({grid: grid})
     this.set('pac', pac)
-    this.get('ghosts').pushObject(Ghost.create({pac: pac}))
-    this.get('ghosts').pushObject(Ghost.create({pac: pac, color: '#A3A'}))
+    var ghost = Ghost.create({pac: pac, grid: grid})
+    this.get('ghosts').pushObject(ghost)
+    this.get('ghosts').pushObject(Ghost.create({pac: pac, grid: grid, color: '#A3A'}))
     this.get('ghosts').forEach(function(ghost){
       ghost.loop();
     })
@@ -30,7 +35,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   drawGrid() {
     let ctx = this.get('ctx');
     let squareSize = this.get('squareSize');
-    this.get('grid').forEach((row, i)=>{
+    this.get('grid.layout').forEach((row, i)=>{
       row.forEach((block, j)=>{
         if(block === 1){
           ctx.fillStyle = '#000';
@@ -73,7 +78,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
       this.decrementProperty('lives')
       this.restart();
     } else if(this.levelComplete()) {
-      this.resetGrid();
+      this.get('grid').reset();
       this.incrementProperty('level')
       this.restart();
     } else {
@@ -85,7 +90,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     if(this.get('lives') <= 0){
       this.set('score', 0);
       this.set('level', 1);
-      this.resetGrid();
+      this.get('grid').reset();
       this.set('lives', 3);
     }
     this.set('ghosts', []);
@@ -99,7 +104,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     } else if (nextCellType === 3){
       this.set('pac.powerPelletTime', this.get('pac.maxPowerPelletTime'));
     }
-    this.get('grid')[this.get('pac.y')][this.get('pac.x')] = 0;
+    this.get('grid.layout')[this.get('pac.y')][this.get('pac.x')] = 0;
   },
 
   didCollide() {
@@ -117,7 +122,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
   draw() {
     let ctx = this.get('ctx');
 
-    ctx.clearRect(0, 0, this.get('boardWidth'), this.get('boardHeight') * this.get('squareSize'))
+    ctx.clearRect(0, 0, this.get('grid.pixelWidth'), this.get('grid.pixelHeight') * this.get('squareSize'))
     this.drawGrid()
     this.get('pac').draw()
     this.get('ghosts').forEach(function(ghost){
@@ -130,5 +135,18 @@ export default Ember.Component.extend(KeyboardShortcuts, GridAware, {
     down() { this.set('pac.intent', 'down')},
     left() { this.set('pac.intent', 'left')},
     right() { this.set('pac.intent', 'right')},
-  }
+  },
+
+  levelComplete() {
+    let hasPelletsLeft = false;
+    this.get('grid.layout').forEach((row)=>{
+      let rowHasPellets = row.any((cell)=>{
+        return cell == 2
+      })
+      if(rowHasPellets){
+        hasPelletsLeft = true
+      }
+    })
+    return !hasPelletsLeft;
+  },
 });

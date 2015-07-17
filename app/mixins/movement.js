@@ -4,6 +4,7 @@ import Ember from 'ember';
 export default Ember.Mixin.create({
   framesPerMovement: 30,
   timers: [],
+  frameCycle: 0,
 
   loop() {
     if(this.get('frameCycle') === this.get("framesPerMovement") || this.get('direction') === 'stopped'){
@@ -32,5 +33,27 @@ export default Ember.Mixin.create({
   centerFor(coordinate, direction){
     let animationChange = this.coordinatesFor(direction)[coordinate] * this.get('frameCycle') / this.get('framesPerMovement')
     return (this.get(coordinate) + 1/2 + animationChange) * this.get('squareSize')
+  },
+
+  pathBlockedInDirection(direction) {
+    let cellTypeInDirection = this.cellTypeInDirection(direction);
+    return Ember.isEmpty(cellTypeInDirection) || cellTypeInDirection === 1;
+  },
+
+  cellTypeInDirection(direction) {
+    let nextX = this.nextCoordinate(direction, 'x');
+    let nextY = this.nextCoordinate(direction, 'y');
+
+    return this.get(`grid.layout.${nextY}.${nextX}`);
+  },
+
+  nextCoordinate(direction, coordinate) {
+    let size = coordinate == 'x' ? this.get('grid.layout')[0].length : this.get('grid.layout').length;
+    let calculatedNext = this.get(coordinate) + this.coordinatesFor(direction)[coordinate];
+    return this.modulo(calculatedNext, size);
+  },
+
+  modulo(num, mod){
+    return ((num + mod) % mod);
   },
 });

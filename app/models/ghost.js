@@ -1,8 +1,8 @@
 import Ember from 'ember';
-import GridAware from '../mixins/grid-aware';
+import GridInfo from '../mixins/grid-info';
 import Movement from '../mixins/movement';
 
-export default Ember.Object.extend(GridAware, Movement, {
+export default Ember.Object.extend(GridInfo, Movement, {
   x: 1, //
   y: 1, //
   direction: 'stopped',
