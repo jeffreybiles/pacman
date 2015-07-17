@@ -44,11 +44,11 @@ export default Ember.Mixin.create({
     let nextX = this.nextCoordinate(direction, 'x');
     let nextY = this.nextCoordinate(direction, 'y');
 
-    return this.get(`grid.layout.${nextY}.${nextX}`);
+    return this.get(`level.grid.${nextY}.${nextX}`);
   },
 
   nextCoordinate(direction, coordinate) {
-    let size = coordinate == 'x' ? this.get('grid.layout')[0].length : this.get('grid.layout').length;
+    let size = coordinate == 'x' ? this.get('level.grid')[0].length : this.get('level.grid').length;
     let calculatedNext = this.get(coordinate) + this.coordinatesFor(direction)[coordinate];
     return this.modulo(calculatedNext, size);
   },

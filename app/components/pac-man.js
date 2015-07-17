@@ -3,28 +3,27 @@ import KeyboardShortcuts from 'ember-keyboard-shortcuts/mixins/component';
 import Ghost from '../models/ghost';
 import Pac from '../models/pac';
 import GridInfo from '../mixins/grid-info';
+import Level from '../models/level';
 
 export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
-  grid: Ember.inject.service(),
-
   score: 0,
   ghosts: [],
   lives: 3,
-  level: 1,
+  levelNumber: 1,
   pac: null,
 
   didInsertElement() {
-    this.get('grid').reset()
+    this.set('level', Level.create({}))
     this.start();
   },
 
   start() {
-    let grid = this.get('grid')
-    let pac = Pac.create({grid: grid})
+    let level = this.get('level');
+    let pac = Pac.create({level: level})
     this.set('pac', pac)
-    var ghost = Ghost.create({pac: pac, grid: grid})
+    var ghost = Ghost.create({pac: pac, level: level})
     this.get('ghosts').pushObject(ghost)
-    this.get('ghosts').pushObject(Ghost.create({pac: pac, grid: grid, color: '#A3A'}))
+    this.get('ghosts').pushObject(Ghost.create({pac: pac, level: level, color: '#A3A'}))
     this.get('ghosts').forEach(function(ghost){
       ghost.loop();
     })
@@ -35,7 +34,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
   drawGrid() {
     let ctx = this.get('ctx');
     let squareSize = this.get('squareSize');
-    this.get('grid.layout').forEach((row, i)=>{
+    this.get('level.grid').forEach((row, i)=>{
       row.forEach((block, j)=>{
         if(block === 1){
           ctx.fillStyle = '#000';
@@ -77,9 +76,9 @@ export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
     if(this.didCollide()){
       this.decrementProperty('lives')
       this.restart();
-    } else if(this.levelComplete()) {
-      this.get('grid').reset();
-      this.incrementProperty('level')
+    } else if(this.levelNumberComplete()) {
+      this.get('level').reset();
+      this.incrementProperty('levelNumber')
       this.restart();
     } else {
       Ember.run.later(this, this.mainLoop, 1000/60)
@@ -89,8 +88,8 @@ export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
   restart() {
     if(this.get('lives') <= 0){
       this.set('score', 0);
-      this.set('level', 1);
-      this.get('grid').reset();
+      this.set('levelNumber', 1);
+      this.get('level').reset();
       this.set('lives', 3);
     }
     this.set('ghosts', []);
@@ -104,7 +103,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
     } else if (nextCellType === 3){
       this.set('pac.powerPelletTime', this.get('pac.maxPowerPelletTime'));
     }
-    this.get('grid.layout')[this.get('pac.y')][this.get('pac.x')] = 0;
+    this.get('level.grid')[this.get('pac.y')][this.get('pac.x')] = 0;
   },
 
   didCollide() {
@@ -122,7 +121,7 @@ export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
   draw() {
     let ctx = this.get('ctx');
 
-    ctx.clearRect(0, 0, this.get('grid.pixelWidth'), this.get('grid.pixelHeight') * this.get('squareSize'))
+    ctx.clearRect(0, 0, this.get('level.pixelWidth'), this.get('level.pixelHeight') * this.get('squareSize'))
     this.drawGrid()
     this.get('pac').draw()
     this.get('ghosts').forEach(function(ghost){
@@ -137,9 +136,9 @@ export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
     right() { this.set('pac.intent', 'right')},
   },
 
-  levelComplete() {
+  levelNumberComplete() {
     let hasPelletsLeft = false;
-    this.get('grid.layout').forEach((row)=>{
+    this.get('level.grid').forEach((row)=>{
       let rowHasPellets = row.any((cell)=>{
         return cell == 2
       })
