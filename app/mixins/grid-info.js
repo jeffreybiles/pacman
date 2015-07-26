@@ -21,6 +21,7 @@ export default Ember.Mixin.create({
     'down': {x: 0, y: 1},
     'left': {x: -1, y: 0},
     'right': {x: 1, y: 0},
-    'stopped': {x: 0, y: 0}
+    'stopped': {x: 0, y: 0},
+    'paused': {x: 0, y: 0}
   },
 })

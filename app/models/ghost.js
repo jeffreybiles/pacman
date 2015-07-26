@@ -8,6 +8,10 @@ export default Ember.Object.extend(GridInfo, Movement, {
   direction: 'stopped',
   color: '#3AA',
   pac: null,
+  timers: ['inJailTime'],
+  inJailTime: 0,
+  maxInJailTime: 7,
+  isInJail: Ember.computed.gt('inJailTime', 0),
 
   draw() {
     let ctx = this.get('ctx');
@@ -53,18 +57,23 @@ export default Ember.Object.extend(GridInfo, Movement, {
   },
 
   changeDirection() {
-    let directions = ['left', 'right', 'up', 'down']
-    let directionWeights = directions.map((direction)=>{
-      return this.chanceOfPacmanIfInDirection(direction);
-    })
+    if(this.get('isInJail')){
+      // do nothing
+    } else {
+      let directions = ['left', 'right', 'up', 'down']
+      let directionWeights = directions.map((direction)=>{
+        return this.chanceOfPacmanIfInDirection(direction);
+      })
 
-    let bestDirection = this.getRandomItem(directions, directionWeights);
-    this.set('direction', bestDirection)
+      let bestDirection = this.getRandomItem(directions, directionWeights);
+      this.set('direction', bestDirection)
+    }
   },
 
   goToJail() {
     this.set('x', this.get('level.jail.x'))
     this.set('y', this.get('level.jail.y'))
-    this.set('direction', 'stopped')
+    this.set('inJailTime', this.get('maxInJailTime'))
+    this.set('direction', 'paused')
   }
 })
