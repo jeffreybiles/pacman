@@ -72,10 +72,15 @@ export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
   mainLoop() {
     this.draw();
     this.eatPellets();
-
-    if(this.didCollide()){
-      this.decrementProperty('lives')
-      this.restart();
+    var collidedWithGhost = this.collidedWithGhost();
+    if(collidedWithGhost){
+      if(this.get('pac.powerMode')){
+        collidedWithGhost.goToJail()
+        Ember.run.later(this, this.mainLoop, 1000/60)
+      } else {
+        this.decrementProperty('lives')
+        this.restart();
+      }
     } else if(this.levelNumberComplete()) {
       this.get('level').reset();
       this.incrementProperty('levelNumber')
@@ -106,13 +111,13 @@ export default Ember.Component.extend(KeyboardShortcuts, GridInfo, {
     this.get('level.grid')[this.get('pac.y')][this.get('pac.x')] = 0;
   },
 
-  didCollide() {
-    let collided = false;
+  collidedWithGhost() {
+    let collided = null;
     let pac = this.get('pac');
     this.get('ghosts').forEach((ghost)=>{
       if(pac.get('x') == ghost.get('x') &&
          pac.get('y') == ghost.get('y')){
-        collided = true
+        collided = ghost
       }
     });
     return collided;

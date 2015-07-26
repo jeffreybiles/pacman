@@ -19,7 +19,7 @@ export default Ember.Object.extend(GridInfo, {
   ],
   startingPac: {x: 4, y: 1},
   startingGhosts: [{x: 1, y: 1}, {x: 1, y: 1}],
-
+  jail: {x: 1, y: 1},
   pixelWidth: Ember.computed(function(){
     if(this.get('grid')){
       return this.get('grid')[0].length * this.get('squareSize')

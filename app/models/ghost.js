@@ -27,8 +27,9 @@ export default Ember.Object.extend(GridInfo, Movement, {
       return 0;
     } else {
       let coordinates = this.coordinatesFor(direction)
-      let chances = ((this.get('pac.y') - this.get('y')) * coordinates.y) +
-             ((this.get('pac.x') - this.get('x')) * coordinates.x)
+      let reverseIfPowered = this.get('pac.powerMode') ? -1 : 1
+      let chances = ((this.get('pac.y') - this.get('y')) * reverseIfPowered * coordinates.y) +
+             ((this.get('pac.x') - this.get('x')) * reverseIfPowered * coordinates.x)
       return Math.max(chances, 0) + 0.2
     }
   },
@@ -60,4 +61,10 @@ export default Ember.Object.extend(GridInfo, Movement, {
     let bestDirection = this.getRandomItem(directions, directionWeights);
     this.set('direction', bestDirection)
   },
+
+  goToJail() {
+    this.set('x', this.get('level.jail.x'))
+    this.set('y', this.get('level.jail.y'))
+    this.set('direction', 'stopped')
+  }
 })
